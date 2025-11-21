@@ -1,6 +1,6 @@
 <?php
 
-namespace InertiaKit\InertiaTableBuilder\Tables\Filters\Factory;
+namespace InertiaKit\InertiaTableBuilder\Inertia\Tables\Filters\Factory;
 
 use InertiaKit\InertiaTableBuilder\Inertia\Tables\Filters\BooleanFilter;
 use InertiaKit\InertiaTableBuilder\Inertia\Tables\Filters\CustomFilter;
