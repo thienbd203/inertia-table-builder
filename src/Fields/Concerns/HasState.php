@@ -1,0 +1,62 @@
+<?php
+
+namespace InertiaKit\InertiaTableBuilder\Inertia\Fields\Concerns;
+
+use InertiaKit\InertiaTableBuilder\Inertia\Forms\Set;
+
+trait HasState
+{
+    /**
+     *
+     * @var \Closure|array|string|int|bool|null
+     */
+    public $state = null;
+
+    protected ?\Closure $afterStateUpdated = null;
+
+    /**
+     * @param mixed $state
+     */
+    public function state($state): static
+    {
+        $this->state = $state;
+
+        return $this;
+    }
+
+    public function getState()
+    {
+        $this->state = is_callable($this->state) ?
+            $this->evaluate($this->state) : $this->state;
+
+        return $this->state;
+    }
+
+    public function hasStateCallback(): bool
+    {
+        return is_callable($this->state);
+    }
+
+    public function hasAfterStateUpdated(): bool
+    {
+        return $this->afterStateUpdated != null;
+    }
+
+    public function afterStateUpdated(callable $state): static
+    {
+        $this->afterStateUpdated = $state;
+
+        return $this;
+    }
+
+    public function triggerAfterStateUpdated($state, array &$formState): void
+    {
+        if ($this->afterStateUpdated) {
+            $set = new Set($this, $formState);
+            $this->evaluate($this->afterStateUpdated, [
+                'state' => $state,
+                'set'   => $set,
+            ]);
+        }
+    }
+}

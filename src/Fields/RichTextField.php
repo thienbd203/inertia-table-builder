@@ -1,0 +1,82 @@
+<?php
+
+namespace InertiaKit\InertiaTableBuilder\Inertia\Fields;
+
+use InertiaKit\InertiaTableBuilder\Inertia\Fields\Base\AbstractField;
+
+class RichTextField extends AbstractField
+{
+    public ?array $toolbar = [
+        'bold',
+        'italic',
+        'underline',
+        'strike',
+        'h1',
+        'h2',
+        'h3',
+        'h4',
+        'h5',
+        'bulletList',
+        'orderedList',
+        'link',
+        'alignLeft',
+        'alignCenter',
+        'alignRight',
+        'code',
+        'codeBlock',
+        'blockquote',
+    ];
+
+    public ?int $minHeight = 250;
+
+    public ?int $maxHeight = null;
+
+    protected static function getType(): string
+    {
+        return 'rich-text';
+    }
+
+    /**
+     * Set custom toolbar options
+     *
+     * @param  array  $options  Array of toolbar options
+     */
+    public function toolbar(array $options): static
+    {
+        $this->toolbar = $options;
+
+        return $this;
+    }
+
+    /**
+     * Set minimum height for the editor
+     */
+    public function minHeight(int $height): static
+    {
+        $this->minHeight = $height;
+
+        return $this;
+    }
+
+    /**
+     * Set maximum height for the editor
+     */
+    public function maxHeight(int $height): static
+    {
+        $this->maxHeight = $height;
+
+        return $this;
+    }
+
+    /**
+     * Convert the field to an array
+     */
+    public function toArray(): array
+    {
+        return array_merge(parent::toArray(), [
+            'toolbar'   => $this->toolbar,
+            'minHeight' => $this->minHeight ?? 200,
+            'maxHeight' => $this->maxHeight,
+        ]);
+    }
+}

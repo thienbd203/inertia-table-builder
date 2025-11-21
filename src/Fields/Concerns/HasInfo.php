@@ -1,0 +1,24 @@
+<?php
+
+namespace InertiaKit\InertiaTableBuilder\Inertia\Fields\Concerns;
+
+use Closure;
+
+trait HasInfo
+{
+    protected bool|Closure $asInfo = false;
+
+    public function info(bool|callable $state = true): static
+    {
+        $this->asInfo = $state;
+
+        return $this;
+    }
+
+    public function getInfo(): bool
+    {
+        return is_callable($this->asInfo) ?
+            $this->evaluate($this->asInfo)
+            : $this->asInfo;
+    }
+}
