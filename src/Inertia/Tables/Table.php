@@ -1,6 +1,6 @@
 <?php
 
-namespace InertiaKit\InertiaTableBuilder\Inertia;
+namespace InertiaKit\InertiaTableBuilder\Inertia\Tables;
 
 use JsonSerializable;
 use Illuminate\Database\Eloquent\Builder;
