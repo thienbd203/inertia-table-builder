@@ -1,60 +1,73 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { router, usePage } from '@inertiajs/vue3'
-import { route } from 'ziggy-js'
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
+import { router, usePage } from '@inertiajs/vue3';
+import { ref } from 'vue';
+import { route } from 'ziggy-js';
 
 // ui components
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
-    DropdownMenuTrigger,
     DropdownMenuContent,
     DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
-} from '@/components/ui/dropdown-menu'
-import {
-    AlertDialog,
-    AlertDialogContent,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogCancel,
-    AlertDialogAction,
-} from '@/components/ui/alert-dialog'
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
 
 // icons
-import { WrenchIcon, Filter as FilterIconComponent, Eye, CheckIcon, XIcon } from 'lucide-vue-next'
+import {
+    CheckIcon,
+    Eye,
+    Filter as FilterIconComponent,
+    WrenchIcon,
+    XIcon,
+} from 'lucide-vue-next';
 
 // types
-import type { Action } from '@/types/datatable'
-import { useDatatableStore } from '@/stores/datatable'
+import { useDatatableStore } from '@/stores/datatable';
+import type { Action } from '@/types/datatable';
 
 const props = defineProps<{
-    idx: string
-}>()
+    idx: string;
+}>();
 
 const store = useDatatableStore(props.idx)();
 
 defineSlots<{
-    toolbarAction?: () => any
-}>()
+    toolbarAction?: () => any;
+}>();
 
-const confirmAction = ref<null | { name: string; label: string; message: string }>(null)
+const confirmAction = ref<null | {
+    name: string;
+    label: string;
+    message: string;
+}>(null);
 
-const { url } = usePage()
+const { url } = usePage();
 
 const handleAction = (action: Action) => {
-    if (action.rowSelected && store.selectedIds.length === 0) return
+    if (action.rowSelected && store.selectedIds.length === 0) return;
 
     if (action.needConfirm) {
-        confirmAction.value = action
-        return
+        confirmAction.value = action;
+        return;
     }
 
-    const routeUrl = store.tableData.actionRoute ?? route(`${store.tableData.baseRoute}.actions`)
+    const routeUrl =
+        store.tableData.actionRoute ??
+        route(`${store.tableData.baseRoute}.actions`);
     router.visit(routeUrl, {
         method: 'post',
         data: {
@@ -64,12 +77,14 @@ const handleAction = (action: Action) => {
         },
         preserveScroll: true,
         preserveState: true,
-    })
-}
+    });
+};
 
 const confirmAndRunAction = () => {
-    if (!confirmAction.value) return
-    const routeUrl = store.tableData.actionRoute ?? route(`${store.tableData.baseRoute}.actions`)
+    if (!confirmAction.value) return;
+    const routeUrl =
+        store.tableData.actionRoute ??
+        route(`${store.tableData.baseRoute}.actions`);
     router.visit(routeUrl, {
         method: 'post',
         data: {
@@ -77,16 +92,20 @@ const confirmAndRunAction = () => {
             action: confirmAction.value.name,
         },
         preserveScroll: true,
-    })
-    confirmAction.value = null
-}
+    });
+    confirmAction.value = null;
+};
 </script>
 
 <template>
-    <div class="flex items-center gap-2 justify-between px-4 py-2">
+    <div class="flex items-center justify-between gap-2 px-4 py-4">
         <!-- Search -->
         <div class="flex items-center gap-2">
-            <Input placeholder="Search..." v-model="store.searchQuery" class="max-w-xs sm:max-w-sm" />
+            <Input
+                placeholder="Search..."
+                v-model="store.searchQuery"
+                class="max-w-xs sm:max-w-sm"
+            />
         </div>
 
         <!-- Toolbar -->
@@ -94,16 +113,26 @@ const confirmAndRunAction = () => {
             <!-- Actions -->
             <DropdownMenu v-if="store.tableData.actions.length > 0">
                 <DropdownMenuTrigger as-child>
-                    <Button class="flex cursor-pointer items-center gap-2" variant="outline" size="sm">
+                    <Button
+                        class="flex cursor-pointer items-center gap-2"
+                        variant="outline"
+                    >
                         <WrenchIcon />
                         <span class="hidden sm:block">Action</span>
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start">
                     <DropdownMenuGroup>
-                        <DropdownMenuItem v-for="action in store.tableData.actions" :key="action.name"
-                            class="cursor-pointer" :disabled="action.rowSelected && store.selectedIds.length === 0"
-                            @select.prevent="handleAction(action)">
+                        <DropdownMenuItem
+                            v-for="action in store.tableData.actions"
+                            :key="action.name"
+                            class="cursor-pointer"
+                            :disabled="
+                                action.rowSelected &&
+                                store.selectedIds.length === 0
+                            "
+                            @select.prevent="handleAction(action)"
+                        >
                             {{ action.label }}
                         </DropdownMenuItem>
                         <slot name="toolbarAction" />
@@ -112,30 +141,77 @@ const confirmAndRunAction = () => {
             </DropdownMenu>
 
             <!-- Filters -->
-            <DropdownMenu v-if="(store.tableData.filters.opt?.length ?? 0) > 0">
-                <DropdownMenuTrigger as-child>
-                    <Button variant="outline" size="sm" class="cursor-pointer gap-2">
+            <Menu as="div" class="relative inline-block text-left">
+                <MenuButton as-child>
+                    <Button variant="outline" class="gap-2">
                         <FilterIconComponent class="h-4 w-4" />
                         <span class="hidden sm:block">Filters</span>
+                        <span
+                            v-if="store.hasFilters"
+                            class="ml-1 text-xs font-semibold"
+                        >
+                            {{ store.activeFilters.length }}
+                        </span>
                     </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Available Filters</DropdownMenuLabel>
-                    <DropdownMenuGroup>
-                        <DropdownMenuItem v-for="filter in store.tableData.filters.opt" :key="filter.field"
-                            @select="store.addFilter(filter.field)" class="flex cursor-pointer items-center gap-2">
-                            <component
-                                :is="store.activeFilters.find((f) => f.field === filter.field) ? CheckIcon : XIcon" />
-                            <span>{{ filter.label }}</span>
-                        </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                </DropdownMenuContent>
-            </DropdownMenu>
+                </MenuButton>
+
+                <MenuItems
+                    class="absolute left-0 z-50 mt-2 origin-top-left rounded-md border bg-background p-2 shadow-lg ring-1 ring-border focus:outline-none"
+                    enter="transition ease-out duration-100"
+                    enter-from="transform opacity-0 scale-95"
+                    enter-to="transform opacity-100 scale-100"
+                    leave="transition ease-in duration-75"
+                    leave-from="transform opacity-100 scale-100"
+                    leave-to="transform opacity-0 scale-95"
+                >
+                    <div class="space-y-1">
+                        <p
+                            class="px-2 py-1.5 text-sm font-medium data-[inset]:pl-8"
+                        >
+                            Add filter
+                        </p>
+
+                        <!-- ĐÚNG CÁCH: Dùng as="div" hoặc as="li" -->
+                        <MenuItem
+                            v-for="filter in store.tableData.filters.opt"
+                            :key="filter.field"
+                            as="div"
+                            v-slot="{ active, close }"
+                        >
+                            <div
+                                @click="
+                                    () => {
+                                        store.addFilter(filter.field);
+                                        close();
+                                    }
+                                "
+                                class="flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors select-none"
+                                :class="
+                                    active
+                                        ? 'bg-accent text-accent-foreground'
+                                        : 'hover:bg-accent hover:text-accent-foreground'
+                                "
+                            >
+                                <CheckIcon
+                                    v-if="
+                                        store.activeFilters.some(
+                                            (f) => f.field === filter.field,
+                                        )
+                                    "
+                                    class="h-4 w-4"
+                                />
+                                <div v-else class="h-4 w-4" />
+                                <span class="truncate">{{ filter.label }}</span>
+                            </div>
+                        </MenuItem>
+                    </div>
+                </MenuItems>
+            </Menu>
 
             <!-- Columns -->
             <DropdownMenu>
                 <DropdownMenuTrigger as-child>
-                    <Button variant="outline" size="sm" class="cursor-pointer gap-2">
+                    <Button variant="outline" class="cursor-pointer gap-2">
                         <Eye class="h-4 w-4" />
                         <span class="hidden sm:block">Columns</span>
                     </Button>
@@ -143,9 +219,19 @@ const confirmAndRunAction = () => {
                 <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Toggle Columns</DropdownMenuLabel>
                     <DropdownMenuGroup>
-                        <DropdownMenuItem v-for="col in store.tableData.columns" :key="col.name"
-                            @select="store.toggleColumn(col.name)" class="flex cursor-pointer items-center gap-2">
-                            <component :is="!store.hiddenColumns[col.name] ? CheckIcon : XIcon" />
+                        <DropdownMenuItem
+                            v-for="col in store.tableData.columns"
+                            :key="col.name"
+                            @select="store.toggleColumn(col.name)"
+                            class="flex cursor-pointer items-center gap-2"
+                        >
+                            <component
+                                :is="
+                                    !store.hiddenColumns[col.name]
+                                        ? CheckIcon
+                                        : XIcon
+                                "
+                            />
                             <span>{{ col.label }}</span>
                         </DropdownMenuItem>
                     </DropdownMenuGroup>
@@ -155,12 +241,22 @@ const confirmAndRunAction = () => {
     </div>
 
     <!-- Modal konfirmasi -->
-    <AlertDialog :open="!!confirmAction" @update:open="(open) => { if (!open) confirmAction = null }">
+    <AlertDialog
+        :open="!!confirmAction"
+        @update:open="
+            (open) => {
+                if (!open) confirmAction = null;
+            }
+        "
+    >
         <AlertDialogContent>
             <AlertDialogHeader>
                 <AlertDialogTitle>Confirmation</AlertDialogTitle>
                 <AlertDialogDescription>
-                    {{ confirmAction?.message ?? `Are you sure want to run this action ${confirmAction?.label}?` }}
+                    {{
+                        confirmAction?.message ??
+                        `Are you sure want to run this action ${confirmAction?.label}?`
+                    }}
                     <div class="mt-2 text-sm text-muted-foreground">
                         {{ store.selectedIds.join(', ') }}
                     </div>
@@ -168,7 +264,9 @@ const confirmAndRunAction = () => {
             </AlertDialogHeader>
             <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction @click="confirmAndRunAction">Proceed</AlertDialogAction>
+                <AlertDialogAction @click="confirmAndRunAction"
+                    >Proceed</AlertDialogAction
+                >
             </AlertDialogFooter>
         </AlertDialogContent>
     </AlertDialog>

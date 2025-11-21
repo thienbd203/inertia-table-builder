@@ -3,7 +3,7 @@ import { useDatatableStore } from '@/stores/datatable';
 import { DataItem, DataTableProps } from '@/types/datatable';
 import { router } from '@inertiajs/vue3';
 import { storeToRefs } from 'pinia';
-import { ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { route } from 'ziggy-js';
 import AppDataTableActiveFilters from './table/AppDataTableActiveFilters.vue';
 import AppDataTableContent from './table/AppDataTableContent.vue';
@@ -101,6 +101,60 @@ watch(
         onCleanup(() => clearTimeout(handler));
     },
 );
+
+onMounted(() => {
+    // ĐỌC TẤT CẢ PARAM TỪ URL KHI F5 → ĐỔ VÀO STORE
+    const params = new URLSearchParams(window.location.search);
+
+    // 1. Global search
+    const q = params.get(prefix + 'q');
+    if (q !== null) {
+        searchQuery.value = q;
+    }
+
+    // 2. Sort
+    const s = params.get(prefix + 'sort');
+    const d = params.get(prefix + 'dir');
+    if (s) sort.value = s;
+    if (d) dir.value = d || 'asc';
+
+    // 3. Filters (hỗ trợ cả filter[name]=like:john và name=john)
+    const newFilters: typeof activeFilters.value = [];
+
+    // Duyệt tất cả filter definitions để biết field nào tồn tại
+    store.tableData.filters.opt?.forEach((filterDef) => {
+        const field = filterDef.field;
+
+        // Ưu tiên lấy từ filter[name]=...
+        const filterParam = params.get(`${prefix}filter[${field}]`);
+        if (filterParam) {
+            const [operator = 'like', valueStr] = filterParam.split(':');
+            const value = valueStr.includes(',')
+                ? valueStr.split(',')
+                : valueStr;
+
+            newFilters.push({ field, operator, value });
+            return;
+        }
+
+        // Fallback: lấy trực tiếp từ ?name=john
+        const directParam = params.get(field);
+        if (directParam !== null && directParam !== '') {
+            newFilters.push({
+                field,
+                operator: filterDef.type === 'date' ? '=' : 'like',
+                value: directParam.includes(',')
+                    ? directParam.split(',')
+                    : directParam,
+            });
+        }
+    });
+
+    // Đẩy vào store
+    if (newFilters.length > 0) {
+        activeFilters.value = newFilters;
+    }
+});
 </script>
 
 <template>

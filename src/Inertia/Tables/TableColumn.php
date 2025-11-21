@@ -21,6 +21,8 @@ class TableColumn implements JsonSerializable
 
     public bool $hidden = false;
 
+    public bool $toggleable = true;
+
     /**
      * @var callable|null
      */
@@ -48,6 +50,13 @@ class TableColumn implements JsonSerializable
     public function sortable(): static
     {
         $this->sortable = true;
+
+        return $this;
+    }
+
+    public function toggleable(bool $toggleable): static
+    {
+        $this->toggleable = $toggleable;
 
         return $this;
     }
@@ -108,6 +117,7 @@ class TableColumn implements JsonSerializable
             'relation'     => $this->relation,
             'relationKey'  => $this->relationKey,
             'relationType' => $this->relationType,
+            'toggleable'   => $this->toggleable,
         ];
     }
 
