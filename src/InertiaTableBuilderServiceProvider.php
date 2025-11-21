@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton;
+namespace InertiaKit\InertiaTableBuilder;
 
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use VendorName\Skeleton\Commands\SkeletonCommand;
+use InertiaKit\InertiaTableBuilder\Commands\InertiaTableBuilderCommand;
 
-class SkeletonServiceProvider extends PackageServiceProvider
+class InertiaTableBuilderServiceProvider extends PackageServiceProvider
 {
     public function configurePackage(Package $package): void
     {
@@ -16,10 +16,10 @@ class SkeletonServiceProvider extends PackageServiceProvider
          * More info: https://github.com/spatie/laravel-package-tools
          */
         $package
-            ->name('skeleton')
+            ->name('inertia-table-builder')
             ->hasConfigFile()
             ->hasViews()
-            ->hasMigration('create_migration_table_name_table')
-            ->hasCommand(SkeletonCommand::class);
+            ->hasMigration('create_inertia_table_builder_table')
+            ->hasCommand(InertiaTableBuilderCommand::class);
     }
 }
