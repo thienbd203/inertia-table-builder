@@ -33,6 +33,8 @@ class TableColumn implements JsonSerializable
 
     public ?int $truncateLines = null;
 
+    public bool $stickable = true;
+
     /**
      * @var callable|null
      */
@@ -138,6 +140,13 @@ class TableColumn implements JsonSerializable
         return $this;
     }
 
+    public function stickable(bool $val = true): static
+    {
+        $this->stickable = $val;
+
+        return $this;
+    }
+
     public function headClass(string $class): static
     {
         $this->headClass = $class;
@@ -169,6 +178,7 @@ class TableColumn implements JsonSerializable
             'align'        => $this->align,
             'wrap'         => $this->wrap,
             'truncateLines' => $this->truncateLines,
+            'stickable'    => $this->stickable,
         ];
     }
 
