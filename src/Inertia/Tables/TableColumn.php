@@ -23,9 +23,11 @@ class TableColumn implements JsonSerializable
 
     public bool $toggleable = true;
 
-    public string $headClass = '';
+    public ?string $align = null;
 
-    public string $cellClass = '';
+    public bool $wrap = false;
+
+    public ?int $truncateLines = null;
 
     /**
      * @var callable|null
@@ -47,20 +49,6 @@ class TableColumn implements JsonSerializable
     public function label(string $label): static
     {
         $this->label = $label;
-
-        return $this;
-    }
-
-    public function headClass(string $headClass): static
-    {
-        $this->headClass = $headClass;
-
-        return $this;
-    }
-
-    public function cellClass(string $cellClass): static
-    {
-        $this->cellClass = $cellClass;
 
         return $this;
     }
@@ -124,6 +112,28 @@ class TableColumn implements JsonSerializable
         return $this;
     }
 
+    public function align(string $align): static
+    {
+        $this->align = $align;
+
+        return $this;
+    }
+
+    public function wrap(bool $wrap = true): static
+    {
+        $this->wrap = $wrap;
+
+        return $this;
+    }
+
+    public function truncate(int $lines): static
+    {
+        $this->truncateLines = $lines;
+        $this->wrap = true; // Automatically set wrap to true when truncating
+
+        return $this;
+    }
+
     public function toArray(): array
     {
         return [
@@ -136,8 +146,9 @@ class TableColumn implements JsonSerializable
             'relationKey'  => $this->relationKey,
             'relationType' => $this->relationType,
             'toggleable'   => $this->toggleable,
-            'headClass'    => $this->headClass,
-            'cellClass'    => $this->cellClass,
+            'align'        => $this->align,
+            'wrap'         => $this->wrap,
+            'truncateLines' => $this->truncateLines,
         ];
     }
 
